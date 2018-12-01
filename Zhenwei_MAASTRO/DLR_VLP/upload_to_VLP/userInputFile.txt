@@ -1,0 +1,64 @@
+{
+	"maxIter": 1000,
+	"trainSitesID": 24,
+	"testSitesID": 24,
+	"sparqlQuery": "PREFIX ncit:<http:\/\/ncicb.nci.nih.gov\/xml\/owl\/EVS\/Thesaurus.owl#> PREFIX roo: <http:\/\/www.cancerdata.org\/roo\/> PREFIX ro: <http:\/\/www.radiomics.org\/RO\/> PREFIX rdfs: <http:\/\/www.w3.org\/2000\/01\/rdf-schema#> PREFIX rdf: <http:\/\/www.w3.org\/1999\/02\/22-rdf-syntax-ns#> PREFIX xsd: <http:\/\/www.w3.org\/2001\/XMLSchema#> PREFIX d2rq: <http:\/\/www.wiwiss.fu-berlin.de\/suhl\/bizer\/D2RQ\/0.1#> SELECT ?patient ?Fstat_energy ?Fmorph_comp_2 ?Frlm_rlnu ?Fszm_glnu ?vitalStatusLabel ?survivalValue WHERE {?patient a ncit:C16960 . ?patient ro:0010217 ?featureObj1 . FILTER contains(str(?featureObj1), \"Fstat\"). ?featureObj1 roo:P100042 ?Fstat_energy. ?patient ro:0010217 ?featureObj2 . FILTER contains(str(?featureObj2), \"Fmorph\"). ?featureObj2 roo:P100042 ?Fmorph_comp_2. ?patient ro:0010217 ?featureObj3 . FILTER contains(str(?featureObj3), \"Frlm\"). ?featureObj3 roo:P100042 ?Frlm_rlnu. ?patient ro:0010217 ?featureObj4 . FILTER contains(str(?featureObj4), \"Fszm\"). ?featureObj4 roo:P100042 ?Fszm_glnu. ?patient roo:P100028 ?vitalStatusObj . ?vitalStatusObj a ?vitalStatusType . FILTER(?vitalStatusType!=ncit:C25717) . ?vitalStatusType rdfs:label ?vitalStatusLabel . ?patient roo:P100026 ?survivalObj . ?survivalObj roo:P100042 ?survivalValue .}",
+	"endpointKey": "DistRadiomicsData",
+	"dataSplitSeed": 1,
+	"outcomeName": [
+		"vitalStatusLabel",
+		"survivalValue"
+	],
+	"featureNames": [
+		"Fstat.energy",
+		"Fmorph.comp.2",
+		"Frlm.rlnu",
+		"Fszm.glnu"
+	],
+	"categoricalFeatureRange": [
+		null,
+		null,
+		null,
+		null
+	],
+	"imputationType": [
+		"mean",
+		"mean",
+		"mean",
+		"mean"
+	],
+	"rho": 1,
+	"alpha": 1.5,
+	"lambda": 0.01,
+	"absTol": 0.01,
+	"relTol": 0.01,
+	"variableNames": [
+		"Fstat.energy",
+		"Fmorph.comp.2",
+		"Frlm.rlnu",
+		"Fszm.glnu",
+		"vitalStatusLabel",
+		"survivalValue"
+	],
+	"x": [
+		[0],
+		[0],
+		[0],
+		[0],
+		[0]
+	],
+	"u": [
+		[0],
+		[0],
+		[0],
+		[0],
+		[0]
+	],
+	"z": [
+		[0],
+		[0],
+		[0],
+		[0],
+		[0]
+	]
+}
