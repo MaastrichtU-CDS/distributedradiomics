@@ -1,0 +1,162 @@
+### D2RQ MAPPING SCRIPT FOR THE FEATURE TABLE ####
+
+## WE INCLUDE THE ONTOLOGIES WE NEED
+
+@prefix map: <> .
+@prefix roo: <http://www.cancerdata.org/roo/>.
+@prefix ncit: <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix ro:<http://www.radiomics.org/RO/>.
+@prefix uo: <http://purl.obolibrary.org/obo/>.
+
+# # we need to specify where are our data. We have different tables
+# 
+# map:database a d2rq:Database;
+# 	d2rq:jdbcDriver "org.postgresql.Driver";
+# 	d2rq:jdbcDSN "jdbc:postgresql://localhost:5432/radiomics";
+# 	d2rq:username "postgres";
+# 	d2rq:password "postgres";
+# 	.
+
+
+############################################
+# csv connection
+############################################
+
+map:database a d2rq:Database;
+	d2rq:jdbcDriver "org.relique.jdbc.csv.CsvDriver";
+	#d2rq:jdbcDSN "jdbc:relique:csv:C:/Users/frank.dankers/Desktop/ivan radiomics lung2 mapping";
+	d2rq:jdbcDSN "jdbc:relique:csv:C:/Users/zhenwei.shi/Documents/PythonBasedDistributedLearning/Data_mapping";
+    #FILL IN THE DIRECTORY OF THE CSV FILE
+	.		
+	
+	
+#Table radiomics features
+
+# mapping the concept of patient (SAME AS TABLE FROM CLINICAL DATA)
+map:patient a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "patient_@@Lung2_Ontology.PatientID@@";
+	d2rq:class ncit:C16960;
+	.
+
+
+# mapping the feature object
+map:feature_obj a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "feature_@@Lung2_Ontology.Feature_name@@_@@Lung2_Ontology.PatientID@@";
+	.
+
+map:feature_uri a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:feature_obj;
+	d2rq:property rdf:type;
+        d2rq:uriColumn "Lung2_Ontology.Feature_name";
+	d2rq:translateWith map:featureMapping;
+	.
+
+#mapping the translations between feature names and concept in the ontology
+map:featureMapping a d2rq:TranslationTable;
+    d2rq:translation [ d2rq:databaseValue "Fstat.energy"; d2rq:rdfValue ro:0050; ];
+    d2rq:translation [ d2rq:databaseValue "Fmorph.comp.2"; d2rq:rdfValue ro:0006; ];
+    d2rq:translation [ d2rq:databaseValue "Frlm.rlnu"; d2rq:rdfValue ro:0116; ];
+    d2rq:translation [ d2rq:databaseValue "Fszm.glnu"; d2rq:rdfValue ro:0131; ];
+	.
+
+#map the predicate has_radiomics_feature (patient has_radiomics_feature feature). it is a D2rq PropertyBridge
+map:featurepredicate a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:patient;
+	d2rq:refersToClassMap map:feature_obj;
+	d2rq:property ro:0010217;
+	.
+
+#map the concept of value
+map:valuepredicate a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:feature_obj;
+	d2rq:property roo:P100042;
+	d2rq:sqlExpression "Lung2_Ontology.Value";
+	d2rq:datatype xsd:double;
+	.
+
+############################################
+# vital status
+############################################
+
+map:vitalStatus a d2rq:ClassMap;
+                d2rq:dataStorage map:database;
+				d2rq:uriPattern "vitalstatus_@@Lung2_clinicalOntology.deadstatus_event@@_@@Lung2_Ontology.PatientID@@";
+				d2rq:join "Lung2_clinicalOntology.PatientID => Lung2_Ontology.PatientID";
+                d2rq:class ncit:C25717;   #vital status
+                .
+                
+# link patient to vital status
+map:vitalStatusBridge a d2rq:PropertyBridge;
+                d2rq:belongsToClassMap map:patient;
+                d2rq:property roo:P100028;
+                d2rq:refersToClassMap map:vitalStatus;
+                .
+                
+# Set the vital status for the resource
+map:VitalStatusValue a d2rq:PropertyBridge;
+                d2rq:belongsToClassMap map:vitalStatus;
+                d2rq:property rdf:type;
+                d2rq:uriColumn "Lung2_clinicalOntology.deadstatus_event";
+                d2rq:translateWith map:vitalStatusMapping;
+                .
+
+#lookup mapping
+map:vitalStatusMapping a d2rq:TranslationTable;
+				d2rq:translation [ d2rq:databaseValue "0"; d2rq:rdfValue ncit:C37987; ]; #life
+                d2rq:translation [ d2rq:databaseValue "1"; d2rq:rdfValue ncit:C28554; ]; #death
+				.
+				
+############################################
+# Survival
+############################################
+
+# define survival classmap
+map:survival a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "survival_@@Lung2_clinicalOntology.PatientID@@";
+	d2rq:join "Lung2_clinicalOntology.PatientID => Lung2_Ontology.PatientID";
+	d2rq:class roo:P100063;					#Survival Time Since First Treatment
+	.
+	
+# define survivalUnit classmap
+map:survivalUnit a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "survivalUnit_@@Lung2_clinicalOntology.PatientID@@";
+	d2rq:class uo:UO_0000033;				#days
+	.
+	
+# link survival and survivalUnit via survivalHasUnit
+map:survivalHasUnit a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:survival;
+	d2rq:property roo:P100027;				#has_unit
+	d2rq:refersToClassMap map:survivalUnit;
+	.
+	
+# value survival
+map:survivalValue a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:survival;
+	d2rq:property roo:P100042;				#has_value
+	d2rq:column "Lung2_clinicalOntology.Survival_time";
+	d2rq:datatype xsd:int;
+	.
+	
+# link vitalStatus to survival via survivalVitalStatus
+map:survivalVitalStatus a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:vitalStatus;
+	d2rq:property roo:P100026;				#has_survival
+	d2rq:refersToClassMap map:survival;
+	.
+	
+# link patient to survival via survivalVitalStatus
+map:survivalVitalStatus a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:patient;
+	d2rq:property roo:P100026;				#has_survival
+	d2rq:refersToClassMap map:survival;
+	.
+	
