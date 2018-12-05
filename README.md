@@ -1,9 +1,9 @@
 # DistributedRadiomics
 
 This code repository accompanies the manuscript  
-'Distributed Radiomics - a signature validation study using a Personal Health Train infrastructure' 
-by  
-
+__'Distributed Radiomics - a signature validation study using a Personal Health Train infrastructure'__
+by
+  
 __Zhenwei Shi, Ivan Zhovannik__, Alberto Traverso,Frank Dankers, Timo Deist, Petros Kalendralis, Rene Monshouwer, Jan Bussink, Rianne Fijten, Hugo JWL Aerts, Andre Dekker, Leonard Wee
 
 (__Bolded__ authors contributed equally)
